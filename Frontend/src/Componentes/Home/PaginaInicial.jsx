@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function PaginaInicial() {
   return (
     <>
-        <Link to='/enviar-relato'>Enviar Relato</Link>
+        <Link to='/enviar-relato'>Gerar Relato</Link>
     </>
   )
 }
