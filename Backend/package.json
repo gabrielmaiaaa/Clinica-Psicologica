@@ -18,6 +18,7 @@
     "concurrently": "^9.1.0"
   },
   "scripts": {
-    "start": "concurrently \"node enviarRelato.js\" \"node notificarPsicologo.js\""
-  }
+  "start": "concurrently \"node routers/enviarRelato.js\" \"node routers/notificarPsicologo.js\""
+}
+
 }
