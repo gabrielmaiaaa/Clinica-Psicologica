@@ -31,9 +31,9 @@ const notificarPsicologo = async (relato) => {
 
 client.on('connect', () => {
     console.log('Conectado ao broker MQTT');
-    client.subscribe('relatos/notificar', (err) => {
-        if (err) {
-            console.error('Erro ao se inscrever no tópico:', err);
+    client.subscribe('relatos/notificar', (error) => {
+        if (error) {
+            console.error('Erro ao se inscrever no tópico:', error);
         } else {
             console.log('Inscrito no tópico "relatos/notificar"');
         }
