@@ -8,6 +8,7 @@ import CreateUser from './Componentes/Auth/CreateUser.jsx'
 import LoginUser from './Componentes/Auth/LoginUser.jsx'
 import PaginaInicial from './Componentes/Home/PaginaInicial.jsx'
 import EnviarRelato from './Componentes/Relato/EnviarRelato.jsx'
+import Consulta from './Componentes/Consulta/Consulta.jsx'
 
 const routes = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const routes = createBrowserRouter([
   {
     path: '/enviar-relato',
     element: <EnviarRelato />
+  },
+  {
+    path: '/consulta',
+    element: <Consulta />
   }
 ]);
 
