@@ -20,6 +20,6 @@
     "concurrently": "^9.1.0"
   },
   "scripts": {
-    "start": "concurrently \"node router/enviarRelato.js\" \"node router/notificarPsicologo.js\" \"node server.js\""
+    "start": "concurrently \"node mqtt/enviarRelato.js\" \"node mqtt/notificarPsicologo.js\" \"node server.js\""
   }
 }
