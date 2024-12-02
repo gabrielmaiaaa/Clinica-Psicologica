@@ -28,12 +28,21 @@ export default function LoginUser() {
       const response = await axios.post('http://localhost:3000/auth/login', data);
       sessionStorage.setItem('token', response.data.token);
       sessionStorage.setItem('id', response.data.id);
+      sessionStorage.setItem('username', response.data.username);
       sessionStorage.setItem('email', response.data.email);
+      // if(response.data.admin === 1){
+      //   setMsg('Admin Autenticado');
+      // } else{
+      //   setMsg('Usuário Autenticado');
+      // }
       setMsg('Usuário Autenticado');
     } catch (error){
       setMsg(error.response.data);
     }
   }
+
+  if(msg.includes('Admin Autenticado'))
+    return <Navigate to='/pagina-inicial'/>;
 
   if(msg.includes('Usuário Autenticado'))
     return <Navigate to='/pagina-inicial'/>;

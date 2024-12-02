@@ -16,6 +16,9 @@ const path = require('path');
 const bdPath = path.join(__dirname,'..','db','cliente.json');
 const usuariosCadastrados = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 
+const administrativoBDPath = path.join(__dirname,'..','db','administrativo.json');
+const psicologosCadastrados = JSON.parse(fs.readFileSync(administrativoBDPath, {encoding: 'utf-8'}));
+
 //Importars modelo de usuário
 const User = require('../models/User');
 
@@ -29,6 +32,23 @@ router.get('/usuarios', autenticadorToken, (req,res) =>{
 
 });
 
+
+router.get('/usuarioLogado/:email', (req,res) => {
+    const { email } = req.params;
+
+    const dadosExpecificos = [];
+
+    
+    const dados = usuariosCadastrados.find(usuario => usuario.email === email);
+
+    if (dados) {
+        dadosExpecificos.push({
+            username: dados.username,
+            email: dados.email
+        });
+    }
+    res.status(200).json(jogoDaJam);
+});
 
 //requisição POST para autenticar usuário.
 //rota pública
@@ -53,7 +73,34 @@ router.post('/login', async (req,res) => {
                 return res.status(200).json({
                     token: tokenAcesso,
                     id: user.id,
-                    email: user.email
+                    username: user.username,
+                    email: user.email,
+                    admin: 0
+                });
+            }
+            else
+                return res.status(422).send(`Usuario ou senhas incorretas.`);
+        }   
+    }
+
+    for (let user of psicologosCadastrados){
+        if(user.email === email){
+            //usuario existe.  Agora é verificar a senha
+            const passwordValidado = await bcrypt.compare(password, user.password);
+            if(passwordValidado===true){
+                //Usuario foi autenticado.
+                //Agora vamos retornar um token de acesso
+                //para isso usamos jwt
+                //O primeiro parametro é o que queremos serializar (o proprio user)
+                //O segundo parametro é a chave secreta do token. Está no arquivo .env
+                //La coloquei as instruções de como gerar
+                const tokenAcesso = jwt.sign(user,process.env.TOKEN);
+                return res.status(210).json({
+                    token: tokenAcesso,
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    admin: 1
                 });
             }
             else
@@ -109,7 +156,7 @@ router.post('/create', async (req, res) => {
 });
 
 router.put('/atualizar', async (req,res) => {
-    const {id, username, email, password, admin} = req.body;
+    const {id, username, email, password} = req.body;
     let cont = 0;
 
     for (let users of usuariosCadastrados){
@@ -127,8 +174,7 @@ router.put('/atualizar', async (req,res) => {
         id,
         username,
         email,
-        password: passwordCrypt,
-        admin
+        password: passwordCrypt
     }
 
     const acharUser = (p) => {

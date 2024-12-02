@@ -7,6 +7,8 @@ export default function PaginaInicial() {
       <Link to='/consultas'>Consulta</Link>
       <br />
       <Link to='/enviar-relato'>Gerar Relato</Link>
+      <br />
+      <Link to='/cadastrarAdmin'>Cadastrar Admin</Link>
     </>
   )
 }

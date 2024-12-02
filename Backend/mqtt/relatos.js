@@ -53,14 +53,14 @@ client.on('message', async (topico, message) => {
             if (gravidade === 'grave') {
                 client.publish(
                     'relatos/notificar',
-                    JSON.stringify({ userId: relato.userId, text: relato.text, gravidade }),
+                    JSON.stringify({ username: relato.username, email: relato.email, text: relato.text, gravidade }),
                     () => {
-                        console.log(`Relato analisado e enviado: ${relato.userId} com gravidade de ${gravidade}`);
+                        console.log(`Relato analisado e enviado: ${relato.username} com gravidade de ${gravidade}`);
                     }
                 );
             }else {
-                console.log(`Relato de ${relato.userId} cadastrado, ${relato.text}`);
-                JSON.stringify({ userId: relato.userId, text: relato.text, gravidade });
+                console.log(`Relato de ${relato.username} cadastrado, ${relato.text}`);
+                JSON.stringify({ username: relato.username, email: relato.email, text: relato.text, gravidade });
             }
         } catch (error) {
             console.error("Erro ao processar mensagem:", error.message);

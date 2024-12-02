@@ -1,23 +1,2 @@
 [
-  {
-    "id": 1733103701631,
-    "paciente": "Pedro",
-    "data": "2024-12-11T03:00:00.000Z",
-    "horario": "22:44",
-    "gravidade": "medio"
-  },
-  {
-    "id": 1733103726305,
-    "paciente": "aaa",
-    "data": "2024-12-04T03:00:00.000Z",
-    "horario": "03:41",
-    "gravidade": "grave"
-  },
-  {
-    "id": 1733104949402,
-    "paciente": "Pedro",
-    "data": "2024-12-02T03:00:00.000Z",
-    "horario": "05:04",
-    "gravidade": "medio"
-  }
 ]

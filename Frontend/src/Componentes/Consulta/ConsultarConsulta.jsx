@@ -5,6 +5,8 @@ import mqtt from 'mqtt';
 
 export default function ConsultarConsulta() {
   const [consultas, setConsultas] = useState([]);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const acharConsultas = async () => {
@@ -15,6 +17,14 @@ export default function ConsultarConsulta() {
         console.log(erro);
       }
     };
+    const storedEmail = sessionStorage.getItem('email');
+    if (storedEmail) {
+      setEmail(storedEmail);
+    }
+    const storedUsername = sessionStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
     acharConsultas();
   }, []);
 
@@ -22,7 +32,9 @@ export default function ConsultarConsulta() {
   const handleDelete = async (dados) => {
     const client = mqtt.connect('wss://test.mosquitto.org:8081');
     const payload = JSON.stringify({
-      id: dados.id
+      id: dados.id,
+      username: username,
+      email: email
     });
   
     console.log('Enviando dados:', payload); // Adicionando log para visibilidade

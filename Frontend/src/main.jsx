@@ -10,6 +10,8 @@ import PaginaInicial from './Componentes/Home/PaginaInicial.jsx'
 import EnviarRelato from './Componentes/Relato/EnviarRelato.jsx'
 import ConsultarConsulta from './Componentes/Consulta/ConsultarConsulta.jsx'
 import CadastrarConsulta from './Componentes/Consulta/CadastrarConsulta.jsx'
+import CadastrarAdmin from './Componentes/Auth/CreateAdmin.jsx'
+import PaginaInicialComum from './Componentes/Home/PaginaInicialComum.jsx'
 
 const routes = createBrowserRouter([
   {
@@ -41,6 +43,14 @@ const routes = createBrowserRouter([
   {
     path: '/cadastraConsulta',
     element: <CadastrarConsulta />
+  },
+  {
+    path: '/cadastrarAdmin',
+    element: <CadastrarAdmin />
+  },
+  {
+    path: '/paginaInicial',
+    element: <PaginaInicialComum />
   }
 ]);
 

@@ -1,11 +1,18 @@
 const mqtt = require('mqtt');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const client = mqtt.connect('wss://test.mosquitto.org:8081');
 
 const bdPath = path.join(__dirname,'..','db','consulta.json');
 const consultasDB = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
+
+const usuarioBDPath = path.join(__dirname,'..','db','cliente.json');
+const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'}));
+
+const psicologoBDPath = path.join(__dirname,'..','db','administrativo.json');
+const psicologoDB = JSON.parse(fs.readFileSync(psicologoBDPath, {encoding: 'utf-8'}));
 
 const Consulta = require('../models/Consulta');
 
@@ -51,6 +58,15 @@ client.on('connect', () => {
     });
 })
 
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    auth: {
+        user: process.env.email,
+        pass: process.env.senha,
+    },
+})
+
 const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
     try {
         const info = await transporter.sendMail({
@@ -72,6 +88,13 @@ client.on('message', async (topico, message) => {
     
     if (topico === 'consulta/cadastrar') {
         const dados = JSON.parse(message.toString());
+
+        const pacienteExistente = usuarioDB.find(usuaio => usuaio.cpf === dados.cpf);
+        
+        if(!pacienteExistente){
+            console.error('Usuario não existe no sistema');
+            return;
+        }
 
         // Verifica se já existe alguma consulta no mesmo dia e horário *antes* de cadastrar a nova consulta
         const conflitoConsulta = consultasDB.find(consulta => consulta.data === dados.data && consulta.horario === dados.horario);
@@ -100,17 +123,36 @@ client.on('message', async (topico, message) => {
                     consultasDB[index2].data = novoHorario.novaData;
                     consultasDB[index2].horario = novoHorario.novoHorario;
 
+                    const pacienteReservado = usuarioDB.find(usuaio => usuaio.cpf === consultasDB[index2].cpf);
+
                     // Cria uma nova consulta grave
                     const id = Date.now();
-                    const consultaGrave = new Consulta(id, dados.paciente, dados.data, dados.horario, dados.gravidade);
+                    const consultaGrave = new Consulta(id, dados.paciente, dados.cpf, dados.cip, dados.data, dados.horario, dados.gravidade);
 
                     // Adiciona a consulta grave no banco de dados
                     consultasDB.push(consultaGrave);
                     fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
 
+                    const assunto = `Nova data da consulta ${consultasDB[index2].data}`
+                    const assunto1 = `Nova data da consulta ${consultaGrave.data}`
+
+                    const htmlPacienteReservado = `
+                        <h1>Olá, ${pacienteReservado.username}!</h1>
+                        <p>A consulta do dia ${consultaGrave.data} acabou sendo alterada!</p>
+                        <p>A sua nova consulta ficou para ${pacienteReservado.data} às ${pacienteReservado.horario}</p>
+                        <p>Att,</p>
+                        <p>Clinica Psiquiatra</p>
+                    `;
+                    const htmlPacienteExistente = `
+                        <h1>Olá, ${consultaGrave.paciente}!</h1>
+                        <p>Nova consulta para o dia ${consultaGrave.data}!</p>
+                        <p>Uma nova consulta foi marcada para o dia ${pacienteReservado.data} às ${pacienteReservado.horario}</p>
+                        <p>Att,</p>
+                        <p>Clinica Psiquiatra</p>
+                    `;
                     // Envia notificações
-                    await enviarNotificacao(consultasDB[index2]); // Para a consulta substituída
-                    await enviarNotificacao(consultaGrave); // Para a nova consulta grave
+                    await enviarNotificacao(pacienteReservado.email, assunto, htmlPacienteReservado); // Para a consulta substituída
+                    await enviarNotificacao(pacienteExistente.email, assunto1, htmlPacienteExistente); // Para a nova consulta grave
 
                     console.log('Consulta grave reagendada com sucesso e paciente notificado.');
                 }
@@ -123,14 +165,14 @@ client.on('message', async (topico, message) => {
         // Se não houver conflito, cria a nova consulta
         try {
             const id = Date.now();
-            const consulta = new Consulta(id, dados.paciente, dados.data, dados.horario, dados.gravidade);
+            const consulta = new Consulta(id, dados.paciente, dados.cpf, dados.cip, dados.data, dados.horario, dados.gravidade);
 
             consultasDB.push(consulta);
             fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
 
             // Se for consulta grave, notifica o paciente
             if (dados.gravidade === 'grave') {
-                await enviarNotificacao(consulta);
+                await enviarNotificacao(pacienteExistente.email, );
                 console.log('Consulta grave cadastrada com sucesso e paciente notificado.');
             }
 
@@ -141,6 +183,13 @@ client.on('message', async (topico, message) => {
         try{
             const dados = JSON.parse(message.toString());
             console.log(dados);
+
+            const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cpf === dados.cip);
+
+            if(!psicologoEncontrado){
+                console.error('Psicologo não encontrado');
+                return;
+            }
         
             // Função para encontrar o índice pelo ID
             const acharIndex = (p) => {
@@ -165,8 +214,22 @@ client.on('message', async (topico, message) => {
                 console.log('A consulta está muito próxima e não pode ser excluída.');
                 return;
             }
-    
-            await enviarNotificacao(consultasDB[index]); // alertar q cancelou a consulta
+            
+            const assunto = `Cancelamento da consulta do dia ${consulta.data}`
+            const htmlPaciente = `
+                <h1>Olá, ${consulta.paciente}!</h1>
+                <p>A consulta do dia ${consulta.data} acabou sendo cancelada, caso queira verificar a situação, basta acessar nosso site!</p>
+                <p>Att,</p>
+                <p>Clinica Psiquiatra</p>
+            `;
+            const htmlPsicologa = `
+                <h1>Olá, ${psicologoEncontrado.username}!</h1>
+                <p>A consulta do dia ${consulta.data} acabou sendo cancelada. Qualquer coisa só verificar no sistema!</p>
+                <p>Att,</p>
+                <p>Clinica Psiquiatra</p>
+            `;
+            await enviarNotificacao(consulta.email, assunto, htmlPaciente); // alertar o cliente q cancelou a consulta
+            await enviarNotificacao(psicologoEncontrado.email, assunto, htmlPsicologa); // alertar a psicologa q cancelou a consulta
         
             // Excluir a consulta
             consultasDB.splice(index, 1);
