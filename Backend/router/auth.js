@@ -16,6 +16,9 @@ const path = require('path');
 const bdPath = path.join(__dirname,'..','db','cliente.json');
 const usuariosCadastrados = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 
+const administrativoBDPath = path.join(__dirname,'..','db','administrativo.json');
+const psicologosCadastrados = JSON.parse(fs.readFileSync(administrativoBDPath, {encoding: 'utf-8'}));
+
 //Importars modelo de usuário
 const User = require('../models/User');
 
@@ -29,6 +32,23 @@ router.get('/usuarios', autenticadorToken, (req,res) =>{
 
 });
 
+
+router.get('/usuarioLogado/:email', (req,res) => {
+    const { email } = req.params;
+
+    const dadosExpecificos = [];
+
+    
+    const dados = usuariosCadastrados.find(usuario => usuario.email === email);
+
+    if (dados) {
+        dadosExpecificos.push({
+            username: dados.username,
+            email: dados.email
+        });
+    }
+    res.status(200).json(jogoDaJam);
+});
 
 //requisição POST para autenticar usuário.
 //rota pública
@@ -53,7 +73,34 @@ router.post('/login', async (req,res) => {
                 return res.status(200).json({
                     token: tokenAcesso,
                     id: user.id,
-                    email: user.email
+                    username: user.username,
+                    email: user.email,
+                    admin: 0
+                });
+            }
+            else
+                return res.status(422).send(`Usuario ou senhas incorretas.`);
+        }   
+    }
+
+    for (let user of psicologosCadastrados){
+        if(user.email === email){
+            //usuario existe.  Agora é verificar a senha
+            const passwordValidado = await bcrypt.compare(password, user.password);
+            if(passwordValidado===true){
+                //Usuario foi autenticado.
+                //Agora vamos retornar um token de acesso
+                //para isso usamos jwt
+                //O primeiro parametro é o que queremos serializar (o proprio user)
+                //O segundo parametro é a chave secreta do token. Está no arquivo .env
+                //La coloquei as instruções de como gerar
+                const tokenAcesso = jwt.sign(user,process.env.TOKEN);
+                return res.status(210).json({
+                    token: tokenAcesso,
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    admin: 1
                 });
             }
             else
@@ -67,39 +114,49 @@ router.post('/login', async (req,res) => {
 
 //requisição POST para cadastrar usuário.
 //rota pública
-router.post('/create', async (req,res) => {
-    //extraindo os dados do formulário para criacao do usuario
-    const {username, email, password} = req.body; 
-    //Para facilitar já estamos considerando as validações feitas no front
-    //agora vamos verificar se já existe usuário com esse e-mail
-    
-    //verifica se já existe usuario com o email informado
-    for (let users of usuariosCadastrados){
-        if(users.email === email){
-            //usuario já existe. Impossivel criar outro
-            //Retornando o erro 409 para indicar conflito
-            return res.status(409).send(`Usuario já existe.`);
-        }   
+router.post('/create', async (req, res) => {
+    // Extraindo os dados do formulário
+    const { username, email, password, cpf, endereco, telefone, idade } = req.body;
+
+    // Verificar se todos os campos obrigatórios foram enviados
+    if (!username || !email || !password || !cpf || !endereco || !telefone || !idade) {
+        return res.status(400).send('Todos os campos são obrigatórios!');
     }
-    //Deu certo. Vamos colocar o usuário no "banco"
-    //Gerar um id incremental baseado na qt de users
+
+    // Verificar se já existe um usuário com esse e-mail
+    for (let user of usuariosCadastrados) {
+        if (user.email === email) {
+            // Usuário já existe, impossível criar outro
+            return res.status(409).send('Usuário já existe.');
+        }
+        if (user.cpf === cpf) {
+            // CPF já cadastrado, impossível criar outro
+            return res.status(409).send('CPF já cadastrado.');
+        }
+    }
+
+    // Gerar um ID único para o novo usuário (você pode optar por outra forma, como incrementação de ID)
     const id = Date.now();
-    
-    //gerar uma senha cryptografada
+
+    // Gerar uma senha criptografada
     const salt = await bcrypt.genSalt(10);
-    const passwordCrypt = await bcrypt.hash(password,salt);
+    const passwordCrypt = await bcrypt.hash(password, salt);
 
-    //Criacao do user
-    const user = new User(id, username, email, passwordCrypt);
+    // Criando o objeto do usuário com todos os campos
+    const user = new User(id, username, email, passwordCrypt, cpf, endereco, telefone, idade);
 
-    //Salva user no "banco"
+    // Salva o usuário no "banco"
     usuariosCadastrados.push(user);
-    fs.writeFileSync(bdPath,JSON.stringify(usuariosCadastrados,null,2));
-    res.status(200).send(`Tudo certo usuario criado com sucesso. id=${id}`);
+
+    // Atualiza o arquivo JSON com os usuários cadastrados
+    fs.writeFileSync(bdPath, JSON.stringify(usuariosCadastrados, null, 2));
+
+    // Retorna uma resposta de sucesso
+    res.status(200).send(`Usuário criado com sucesso. ID: ${id}`);
 });
 
 router.put('/atualizar', async (req,res) => {
-    const {id, username, email, password, admin} = req.body;
+    const {id, username, email, password} = req.body;
     let cont = 0;
 
     for (let users of usuariosCadastrados){
@@ -117,8 +174,7 @@ router.put('/atualizar', async (req,res) => {
         id,
         username,
         email,
-        password: passwordCrypt,
-        admin
+        password: passwordCrypt
     }
 
     const acharUser = (p) => {

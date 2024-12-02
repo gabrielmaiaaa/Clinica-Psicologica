@@ -13,10 +13,10 @@ const schema = yup.object({
   cpf: yup.string().required('CPF é obrigatório').length(11, 'CPF deve ter 11 caracteres'),
   endereco: yup.string().required('Endereço é obrigatório'),
   telefone: yup.string().required('Telefone é obrigatório').matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Formato de telefone inválido'),
-  idade: yup.number().required('Idade é obrigatória').min(18, 'Idade mínima é 18 anos').max(120, 'Idade máxima é 120 anos')
+  cip: yup.string().required('CIP é obrigatória').length(7, 'CIP deve ter 7 caracteres'),
 }).required();
 
-export default function CreateUser() {
+export default function CreateAdmin() {
 
   const [msg, setMsg] = useState();
 
@@ -29,7 +29,7 @@ export default function CreateUser() {
 
   const submit = async (data) => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/create', data);
+      const response = await axios.post('http://localhost:3000/psicologo/createPsicologo', data);
       if (response.status === 200)
         setMsg('OK');
     } catch (error) {
@@ -42,7 +42,7 @@ export default function CreateUser() {
 
   return (
     <>
-      <h2>Criar Usuário</h2>
+      <h2>Cadastrar Psicologo</h2>
       <form onSubmit={handleSubmit(submit)} noValidate>
         <label htmlFor="username">Nome</label>
         <input type="text" id='username' {...register('username')} />
@@ -75,10 +75,10 @@ export default function CreateUser() {
         <input type="text" id='telefone' {...register('telefone')} />
         <p className='erro'> {errors.telefone?.message} </p>
 
-        {/* Campo Idade */}
-        <label htmlFor="idade">Idade</label>
-        <input type="number" id='idade' {...register('idade')} />
-        <p className='erro'> {errors.idade?.message} </p>
+        {/* Campo CIP */}
+        <label htmlFor="cip">CIP</label>
+        <input type="text" id='cip' {...register('cip')} />
+        <p className='erro'> {errors.cip?.message} </p>
 
         <button>Registrar</button>
       </form>

@@ -1,6 +1,6 @@
-class User {
+class Psicologo {
 
-    constructor(id, username, email, password, cpf, endereco, telefone, idade) {
+    constructor(id, username, email, password, cpf, endereco, telefone, cip) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -8,8 +8,8 @@ class User {
         this.cpf = cpf;
         this.endereco = endereco;
         this.telefone = telefone;
-        this.idade = idade;
+        this.cip = cip;
     }
   }
   
-  module.exports = User;
+  module.exports = Psicologo;

@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const router = express.Router();
 
@@ -20,72 +21,24 @@ const transporter = nodemailer.createTransport({
     },
 })
 
-const notificarPaciente = async (consulta) => {
-    const info = await transporter.sendMail({
-        from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
-        to: 'gabrielmaia6743@gmail.com', 
-        subject: `Nova data de consulta ${consulta.data}`,
-        text: `Nova consulta marcada para você!`,
-        html: `
-            <h1>Nova data de consulta</h1>
-            <p>Boa noite, ${consulta.paciente}!</p>
-            <p>A psicologa Carol marcou uma nova data para você. A nova consulta será no dia ${consulta.data} às ${consulta.horario}</p>
-            <p>Att.</p>
-        `,
-    })
-    console.log(`Notificação enviada: ${info.messageId}`);
-}
-
-const notificarPacienteAlteracaoConsulta = async (consulta) => {
-    const info = await transporter.sendMail({
-        from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
-        to: 'gabrielmaia6743@gmail.com', 
-        subject: `Consulta alterada ${consulta.data}`,
-        text: `Nova consulta marcada para você!`,
-        html: `
-            <h1>Nova data de consulta</h1>
-            <p>Boa noite, ${consulta.paciente}!</p>
-            <p>A psicologa Carol remarcou uma consulta sua. A nova consulta será no dia ${consulta.data} às ${consulta.horario}</p>
-            <p>Att.</p>
-        `,
-    })
-    console.log(`Notificação enviada: ${info.messageId}`);
-}
-
-router.post('/cadastrarConsulta', async (req, res) => {
-    // realiazar cadastro de uma consulta
-    const {paciente, data, horario, gravidade} = req.body;
-
-    for (let consultas of consultasDB){
-        if(consultas.data === data){
-            if(consultas.horario !== horario){
-                const id = Date.now();
-                const consulta = new Consulta(id, paciente, data, horario, gravidade);
-
-                consultasDB.push(consulta);
-                fs.writeFileSync(bdPath,JSON.stringify(consultasDB,null,2));
-
-                return res.status(200).send('Consulta cadastrada com sucesso');
-            }else if(consultas.horario === horario && consultas.gravidade === gravidade){
-                try{
-                    const id = Date.now();
-                    const consulta = new Consulta(id, paciente, data, horario, gravidade);
-
-                    consultasDB.push(consulta);
-                    fs.writeFileSync(bdPath,JSON.stringify(consultasDB,null,2));
-
-                    await notificarPaciente(consulta);
-
-                    return res.status(200).send('Consulta cadastrada com sucesso e paciente notificado');
-                } catch (error){
-                    return console.error('Erro ao processar mensagem:', error);
-                }
-            }else 
-                return res.status(422).send("Horario já com consulta");
-        } 
+const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
+            to: destinatario,
+            subject: assunto,
+            html: conteudoHTML,
+        });
+        console.log(`Notificação enviada: ${info.messageId}`);
+    } catch (error) {
+        console.error('Erro ao enviar notificação:', error.message);
+        throw new Error('Erro ao enviar notificação.');
     }
-    return res.status(422).send("Horario já com consulta")
-});
+};
+
+router.get('/consultas', (req, res) => {
+    res.status(200).json(consultasDB);
+})
 
 router.put('/atualizarConsulta', async (req, res) => {
     // permitir atualizar data de uma consulta (verificando se já existe uma e permitindo somente o psicologo alterar data que tem conflito)
@@ -150,18 +103,6 @@ router.put('/atualizarConsulta', async (req, res) => {
         } catch (error) {
             return console.error('Erro ao processar mensagem:', error);}
     }
-});
-
-router.delete('/deletarConsulta', (req, res) => {
-    // excluir uma consulta (se quiser pode colocar pra n excluir muito em cima da hora)
-    const {id, paciente, data, horario, gravidade} = req.body;
-
-    let index = consultasDB.findIndex(usuario => usuario.id === id);
-
-    consultasDB.splice(index, 1);
-
-    fs.writeFileSync(bdPath,JSON.stringify(consultasDB, null, 2));
-    return res.status(200).send('Consulta excluida');
 });
 
 module.exports = router;

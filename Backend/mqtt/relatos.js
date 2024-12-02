@@ -6,6 +6,9 @@ const language = require('@google-cloud/language');
 const bdPath = path.join(__dirname, '..', 'db', 'relato.json');
 const relatosBD = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 
+const usuarioBDPath = path.join(__dirname,'..','db','cliente.json');
+const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'}));
+
 const client = mqtt.connect('wss://test.mosquitto.org:8081');
 
 // Configurando as credenciais
@@ -29,8 +32,14 @@ client.on('message', async (topico, message) => {
         try {
             const relato = JSON.parse(message.toString());
 
+            const usuarioAchado = usuarioDB.find(usuario => usuario.email === relato.email);
+            const dadosCompletos = {
+                    ...usuarioAchado,  
+                    ...relato,         
+                };
+
             //Salva user no "banco"
-            relatosBD.push(relato);
+            relatosBD.push(dadosCompletos);
             fs.writeFileSync(bdPath, JSON.stringify(relatosBD, null, 2));
 
             // Analisar sentimento usando a API
@@ -41,6 +50,8 @@ client.on('message', async (topico, message) => {
 
             const [result] = await AI.analyzeSentiment({ document });
             const sentiment = result.documentSentiment;
+            console.log(sentiment.score);
+            
 
             // Determinar gravidade com base no score de sentimento
             let gravidade = 'normal'; // Default
@@ -51,14 +62,14 @@ client.on('message', async (topico, message) => {
             if (gravidade === 'grave') {
                 client.publish(
                     'relatos/notificar',
-                    JSON.stringify({ userId: relato.userId, text: relato.text, gravidade }),
+                    JSON.stringify({ username: relato.username, email: relato.email, text: relato.text, gravidade }),
                     () => {
-                        console.log(`Relato analisado e enviado: ${relato.userId} com gravidade de ${gravidade}`);
+                        console.log(`Relato analisado e enviado: ${relato.username} com gravidade de ${gravidade}`);
                     }
                 );
             }else {
-                console.log(`Relato de ${relato.userId} cadastrado, ${relato.text}`);
-                JSON.stringify({ userId: relato.userId, text: relato.text, gravidade });
+                console.log(`Relato de ${relato.username} cadastrado, ${relato.text}`);
+                JSON.stringify({ username: relato.username, email: relato.email, text: relato.text, gravidade });
             }
         } catch (error) {
             console.error("Erro ao processar mensagem:", error.message);
