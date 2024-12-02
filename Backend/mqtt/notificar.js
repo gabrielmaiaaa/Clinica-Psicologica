@@ -1,11 +1,15 @@
 const mqtt = require('mqtt');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
 const client = mqtt.connect('wss://test.mosquitto.org:8081');
 
 const psicologoBDPath = path.join(__dirname,'..','db','administrativo.json');
 const psicologoDB = JSON.parse(fs.readFileSync(psicologoBDPath, {encoding: 'utf-8'}));
+
+const psicologoComCip = psicologoDB.find(psicologo => psicologo.cip && psicologo.cip.trim() !== '');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -19,7 +23,7 @@ const transporter = nodemailer.createTransport({
 const notificarPsicologo = async (relato) => {
     const info = await transporter.sendMail({
         from: '"Central de Relatos" <gabrielmaia6743@gmail.com>',
-        to: `${relato.email}`, 
+        to: `${psicologoComCip.email}`, 
         subject: `Novo relato com alta prioridade: ${relato.gravidade}`,
         text: `Novo relato recebido do ${relato.username}, com gravidade ${relato.gravidade}. Marque uma nova consulta o quanto antes.`,
         html: `

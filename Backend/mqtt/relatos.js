@@ -6,6 +6,9 @@ const language = require('@google-cloud/language');
 const bdPath = path.join(__dirname, '..', 'db', 'relato.json');
 const relatosBD = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 
+const usuarioBDPath = path.join(__dirname,'..','db','cliente.json');
+const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'}));
+
 const client = mqtt.connect('wss://test.mosquitto.org:8081');
 
 // Configurando as credenciais
@@ -29,8 +32,14 @@ client.on('message', async (topico, message) => {
         try {
             const relato = JSON.parse(message.toString());
 
+            const usuarioAchado = usuarioDB.find(usuario => usuario.email === relato.email);
+            const dadosCompletos = {
+                    ...usuarioAchado,  
+                    ...relato,         
+                };
+
             //Salva user no "banco"
-            relatosBD.push(relato);
+            relatosBD.push(dadosCompletos);
             fs.writeFileSync(bdPath, JSON.stringify(relatosBD, null, 2));
 
             // Analisar sentimento usando a API

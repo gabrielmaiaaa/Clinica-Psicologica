@@ -33,6 +33,7 @@ export default function ConsultarConsulta() {
     const client = mqtt.connect('wss://test.mosquitto.org:8081');
     const payload = JSON.stringify({
       id: dados.id,
+      cip: dados.cip,
       username: username,
       email: email
     });

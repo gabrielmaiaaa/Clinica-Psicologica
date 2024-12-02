@@ -14,6 +14,8 @@ const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'})
 const psicologoBDPath = path.join(__dirname,'..','db','administrativo.json');
 const psicologoDB = JSON.parse(fs.readFileSync(psicologoBDPath, {encoding: 'utf-8'}));
 
+require('dotenv').config();
+
 const Consulta = require('../models/Consulta');
 
 // Função para buscar um novo horário disponível para a consulta grave em dias seguintes
@@ -33,7 +35,8 @@ const buscarNovoHorario = (data, horarioAtual) => {
         novaData.setDate(dataAtual.getDate() + diaOffset);
         
         // Formatando a data novamente para comparar
-        let dataFormatada = novaData.toISOString().split('T')[0];  // Data no formato YYYY-MM-DD
+        // let dataFormatada = novaData.toISOString().split('T')[0];  // Data no formato YYYY-MM-DD
+        let dataFormatada = novaData;  // Data no formato YYYY-MM-DD
 
         // Verificando se já existe alguma consulta no novo dia
         for (let i = 0; i < horariosDisponiveis.length; i++) {
@@ -78,7 +81,6 @@ const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
         console.log(`Notificação enviada: ${info.messageId}`);
     } catch (error) {
         console.error('Erro ao enviar notificação:', error.message);
-        throw new Error('Erro ao enviar notificação.');
     }
 };
 
@@ -133,28 +135,37 @@ client.on('message', async (topico, message) => {
                     consultasDB.push(consultaGrave);
                     fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
 
+                    const pacienteOficial = usuarioDB.find(usuaio => usuaio.cpf === consultaGrave.cpf);
+        
+                    if(!pacienteOficial){
+                        console.error('Usuario não existe no sistema');
+                        return;
+                    }
+
                     const assunto = `Nova data da consulta ${consultasDB[index2].data}`
                     const assunto1 = `Nova data da consulta ${consultaGrave.data}`
 
                     const htmlPacienteReservado = `
                         <h1>Olá, ${pacienteReservado.username}!</h1>
                         <p>A consulta do dia ${consultaGrave.data} acabou sendo alterada!</p>
-                        <p>A sua nova consulta ficou para ${pacienteReservado.data} às ${pacienteReservado.horario}</p>
+                        <p>A sua nova consulta ficou para ${consultasDB[index2].data} às ${consultasDB[index2].horario}</p>
                         <p>Att,</p>
                         <p>Clinica Psiquiatra</p>
                     `;
                     const htmlPacienteExistente = `
                         <h1>Olá, ${consultaGrave.paciente}!</h1>
                         <p>Nova consulta para o dia ${consultaGrave.data}!</p>
-                        <p>Uma nova consulta foi marcada para o dia ${pacienteReservado.data} às ${pacienteReservado.horario}</p>
+                        <p>Uma nova consulta foi marcada para o dia ${consultaGrave.data} às ${consultaGrave.horario}</p>
                         <p>Att,</p>
                         <p>Clinica Psiquiatra</p>
                     `;
                     // Envia notificações
-                    await enviarNotificacao(pacienteReservado.email, assunto, htmlPacienteReservado); // Para a consulta substituída
-                    await enviarNotificacao(pacienteExistente.email, assunto1, htmlPacienteExistente); // Para a nova consulta grave
-
+                    await Promise.all([
+                        enviarNotificacao(pacienteReservado.email, assunto, htmlPacienteReservado), // Para a consulta substituída
+                        enviarNotificacao(pacienteOficial.email, assunto1, htmlPacienteExistente) // Para a nova consulta grave
+                    ])
                     console.log('Consulta grave reagendada com sucesso e paciente notificado.');
+                    return;
                 }
             } else {
                 console.log("Horário ocupado por outra consulta.");
@@ -170,10 +181,37 @@ client.on('message', async (topico, message) => {
             consultasDB.push(consulta);
             fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
 
+            const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cip === consulta.cip);
+
+            if(!psicologoEncontrado){
+                console.error('Psicologo não encontrado');
+                return;
+            }
+
             // Se for consulta grave, notifica o paciente
             if (dados.gravidade === 'grave') {
-                await enviarNotificacao(pacienteExistente.email, );
+                const assunto = `Nova data da consulta ${consulta.data}`
+
+                const htmlPacienteReservado = `
+                    <h1>Olá, ${pacienteExistente.username}!</h1>
+                    <p>Nova consulta para o dia ${consulta.data}!</p>
+                    <p>Uma nova consulta ficou para o dia ${consulta.data} às ${consulta.horario}</p>
+                    <p>Att,</p>
+                    <p>Clinica Psiquiatra</p>
+                `;
+                const htmlPsicologo = `
+                    <h1>Olá, ${psicologoEncontrado.username}!</h1>
+                    <p>Nova consulta para o dia ${consulta.data}!</p>
+                    <p>Uma nova consulta ficou para o dia ${consulta.data} às ${consulta.horario}</p>
+                    <p>Att,</p>
+                    <p>Clinica Psiquiatra</p>
+                `;
+                await Promise.all([
+                    enviarNotificacao(pacienteExistente.email, assunto, htmlPacienteReservado),
+                    enviarNotificacao(psicologoEncontrado.email, assunto, htmlPsicologo)
+                ]);
                 console.log('Consulta grave cadastrada com sucesso e paciente notificado.');
+                return
             }
 
         } catch (error) {
@@ -183,13 +221,6 @@ client.on('message', async (topico, message) => {
         try{
             const dados = JSON.parse(message.toString());
             console.log(dados);
-
-            const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cpf === dados.cip);
-
-            if(!psicologoEncontrado){
-                console.error('Psicologo não encontrado');
-                return;
-            }
         
             // Função para encontrar o índice pelo ID
             const acharIndex = (p) => {
@@ -205,6 +236,14 @@ client.on('message', async (topico, message) => {
         
             // Verificar se a data está próxima
             const consulta = consultasDB[index];
+
+            const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cip === consulta.cip);
+
+            if(!psicologoEncontrado){
+                console.error('Psicologo não encontrado');
+                return;
+            }
+
             const agora = new Date();
             agora.setHours(0, 0, 0, 0);
             const dataConsulta = new Date(consulta.data);
@@ -214,10 +253,17 @@ client.on('message', async (topico, message) => {
                 console.log('A consulta está muito próxima e não pode ser excluída.');
                 return;
             }
+
+            const pacienteExistente = usuarioDB.find(usuaio => usuaio.cpf === consulta.cpf);
+        
+            if(!pacienteExistente){
+                console.error('Usuario não existe no sistema');
+                return;
+            }
             
             const assunto = `Cancelamento da consulta do dia ${consulta.data}`
             const htmlPaciente = `
-                <h1>Olá, ${consulta.paciente}!</h1>
+                <h1>Olá, ${pacienteExistente.paciente}!</h1>
                 <p>A consulta do dia ${consulta.data} acabou sendo cancelada, caso queira verificar a situação, basta acessar nosso site!</p>
                 <p>Att,</p>
                 <p>Clinica Psiquiatra</p>
@@ -228,8 +274,12 @@ client.on('message', async (topico, message) => {
                 <p>Att,</p>
                 <p>Clinica Psiquiatra</p>
             `;
-            await enviarNotificacao(consulta.email, assunto, htmlPaciente); // alertar o cliente q cancelou a consulta
-            await enviarNotificacao(psicologoEncontrado.email, assunto, htmlPsicologa); // alertar a psicologa q cancelou a consulta
+            
+            await Promise.all([
+                enviarNotificacao(pacienteExistente.email, assunto, htmlPaciente), // alertar o cliente que cancelou a consulta
+                enviarNotificacao(psicologoEncontrado.email, assunto, htmlPsicologa) // alertar a psicologa q cancelou a consulta
+              ]);
+              
         
             // Excluir a consulta
             consultasDB.splice(index, 1);
