@@ -8,7 +8,10 @@
     "express": "^4.21.1",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.11.0",
+    "mongodb-connection-string-url": "^3.0.1",
     "mqtt": "^5.10.2",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "path": "^0.12.7",
@@ -20,6 +23,6 @@
     "concurrently": "^9.1.0"
   },
   "scripts": {
-    "start": "concurrently \"node mqtt/enviarRelato.js\" \"node mqtt/notificarPsicologo.js\" \"node server.js\""
+    "start": "concurrently \"node server.js\" \"node mqtt/relatos.js\" \"node mqtt/consultas.js\" \"node mqtt/notificar.js\""
   }
 }

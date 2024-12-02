@@ -1,15 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import mqtt from 'mqtt';
 
 export default function ConsultarConsulta() {
   const [consultas, setConsultas] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/consulta/consultas')
-      .then((response) => response.json())
-      .then((data) => setConsultas(data))
-      .catch((error) => console.error('Erro ao buscar consultas:', error));
+    const acharConsultas = async () => {
+      try {
+        const resposta = await axios.get(`http://localhost:3000/consulta/consultas`);
+        if (resposta.status === 200) setConsultas(resposta.data);
+      } catch (erro) {
+        console.log(erro);
+      }
+    };
+    acharConsultas();
   }, []);
+
+  // Função de envio dos dados
+  const handleDelete = async (dados) => {
+    const client = mqtt.connect('wss://test.mosquitto.org:8081');
+    const payload = JSON.stringify({
+      id: dados.id
+    });
+  
+    console.log('Enviando dados:', payload); // Adicionando log para visibilidade
+  
+    client.publish('consulta/excluirConsulta', payload, () => {
+      console.log('Mensagem publicada com sucesso no tópico "consulta/excluirConsulta"');
+    });
+  };
 
   return (
     <>
@@ -21,12 +42,13 @@ export default function ConsultarConsulta() {
             <p>Data: {consulta.data}</p>
             <p>Horário: {consulta.horario}</p>
             <p>Urgência: {consulta.gravidade}</p>
+            <button onClick={() => handleDelete(consulta)}>Excluir</button>
           </div>
         ))
       ) : (
         <p>Carregando consultas...</p>
       )}
-      <Link to='/cadastraConsulta'>Cadastrar</Link>
+      <Link to="/cadastraConsulta">Cadastrar</Link>
     </>
   );
 }

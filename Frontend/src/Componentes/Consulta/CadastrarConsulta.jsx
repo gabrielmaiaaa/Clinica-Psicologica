@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import axios from "axios";
 import { Navigate, Link } from "react-router-dom";
+import mqtt from 'mqtt';
 
 // Validação com Yup
 const schema = yup.object({
@@ -34,17 +35,20 @@ export default function CadastrarConsulta() {
 
   // Função de envio dos dados
   const submit = async (data) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/consulta/cadastrarConsulta",
-        data
-      );
-      if (response.status === 200) {
-        setMsg("Consulta cadastrada com sucesso!");
-      }
-    } catch (error) {
-      setMsg(error.response?.data || "Erro ao cadastrar consulta!");
-    }
+    const client = mqtt.connect('wss://test.mosquitto.org:8081');
+    const payload = JSON.stringify({
+      paciente: data.paciente,
+      data: data.data,
+      horario: data.horario,
+      gravidade: data.gravidade
+    });
+  
+    console.log('Enviando dados:', payload); // Adicionando log para visibilidade
+  
+    client.publish('consulta/cadastrar', payload, () => {
+      console.log('Mensagem publicada com sucesso no tópico "consulta/cadastrar"');
+      setMsg("Consulta cadastrada com sucesso!");
+    });
   };
 
   if (msg === "Consulta cadastrada com sucesso!") {
@@ -84,7 +88,7 @@ export default function CadastrarConsulta() {
       </form>
 
       <p className="server-response">{msg}</p>
-      <Link to="/">Voltar</Link>
+      <Link to="/consultas">Voltar</Link>
     </>
   );
 }

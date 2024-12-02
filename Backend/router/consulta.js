@@ -235,11 +235,18 @@ router.put('/atualizarConsulta', async (req, res) => {
     }
 });
 
-router.delete('/deletarConsulta', (req, res) => {
+router.delete('/deletarConsulta/:id', (req, res) => {
     // excluir uma consulta (se quiser pode colocar pra n excluir muito em cima da hora)
-    const {id, paciente, data, horario, gravidade} = req.body;
+    const {id} = req.params;
+    console.log(id);
+    
+    const acharIndex = (p) => {
+        return p.id === Number(id);
+    }
 
-    let index = consultasDB.findIndex(usuario => usuario.id === id);
+    const index = consultasDB.findIndex(acharIndex);
+    
+    console.log(index);
 
     consultasDB.splice(index, 1);
 

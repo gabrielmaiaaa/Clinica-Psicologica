@@ -41,6 +41,8 @@ client.on('message', async (topico, message) => {
 
             const [result] = await AI.analyzeSentiment({ document });
             const sentiment = result.documentSentiment;
+            console.log(sentiment.score);
+            
 
             // Determinar gravidade com base no score de sentimento
             let gravidade = 'normal'; // Default
