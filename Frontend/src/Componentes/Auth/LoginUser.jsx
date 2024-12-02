@@ -58,7 +58,6 @@ export default function LoginUser() {
         Não possui conta?
         <Link to='/cadastro'>Cadastro</Link>
       </div>
-      <Link to='/pagina-inicial'>Acessar site</Link>
     </>
   )
 }

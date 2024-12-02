@@ -12,5 +12,12 @@
     "data": "2024-12-04T03:00:00.000Z",
     "horario": "03:41",
     "gravidade": "grave"
+  },
+  {
+    "id": 1733104949402,
+    "paciente": "Pedro",
+    "data": "2024-12-02T03:00:00.000Z",
+    "horario": "05:04",
+    "gravidade": "medio"
   }
 ]

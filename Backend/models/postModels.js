@@ -7,7 +7,7 @@ const { ObjectId } = require('mongodb');
 const router = express.Router();
 
 // Conexão com o banco de dados
-const conexao = await conectarAoBanco('mongodb+srv://maia:dZCFEdzITHiNyr7V@clinicapsiquiatra.7ursi.mongodb.net/');
+const conexao = await conectarAoBanco(conectarAoBanco);
 const db = conexao.db("mqtt");
 const collection = db.collection("Consulta");
 

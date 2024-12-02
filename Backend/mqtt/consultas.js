@@ -11,7 +11,7 @@ const Consulta = require('../models/Consulta');
 
 // Função para buscar um novo horário disponível para a consulta grave em dias seguintes
 const buscarNovoHorario = (data, horarioAtual) => {
-    const horariosDisponiveis = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
+    const horariosDisponiveis = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'];
 
     // Convertendo a data de string para objeto Date
     let dataAtual = new Date(data);
@@ -50,6 +50,21 @@ client.on('connect', () => {
         }
     });
 })
+
+const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
+            to: destinatario,
+            subject: assunto,
+            html: conteudoHTML,
+        });
+        console.log(`Notificação enviada: ${info.messageId}`);
+    } catch (error) {
+        console.error('Erro ao enviar notificação:', error.message);
+        throw new Error('Erro ao enviar notificação.');
+    }
+};
 
 client.on('message', async (topico, message) => {
     console.log('Mensagem recebida no tópico:', topico);
@@ -94,8 +109,8 @@ client.on('message', async (topico, message) => {
                     fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
 
                     // Envia notificações
-                    await notificarPacienteAlteracaoConsulta(consultasDB[index2]); // Para a consulta substituída
-                    await notificarPaciente(consultaGrave); // Para a nova consulta grave
+                    await enviarNotificacao(consultasDB[index2]); // Para a consulta substituída
+                    await enviarNotificacao(consultaGrave); // Para a nova consulta grave
 
                     console.log('Consulta grave reagendada com sucesso e paciente notificado.');
                 }
@@ -115,29 +130,52 @@ client.on('message', async (topico, message) => {
 
             // Se for consulta grave, notifica o paciente
             if (dados.gravidade === 'grave') {
-                await notificarPaciente(consulta);
+                await enviarNotificacao(consulta);
                 console.log('Consulta grave cadastrada com sucesso e paciente notificado.');
             }
 
         } catch (error) {
             console.error('Erro ao processar mensagem:', error);
         }
-    } else if (topico === 'consulta/excluirConsulta'){
-        const dados = JSON.parse(message.toString());
-        console.log(dados);
+    } else if (topico === 'consulta/excluirConsulta') {
+        try{
+            const dados = JSON.parse(message.toString());
+            console.log(dados);
         
-        const acharIndex = (p) => {
-            return p.id === Number(dados.id);
+            // Função para encontrar o índice pelo ID
+            const acharIndex = (p) => {
+                return p.id === Number(dados.id);
+            };
+        
+            const index = consultasDB.findIndex(acharIndex);
+            
+            if (index === -1) {
+                console.log('Consulta não encontrada');
+                return;
+            }
+        
+            // Verificar se a data está próxima
+            const consulta = consultasDB[index];
+            const agora = new Date();
+            agora.setHours(0, 0, 0, 0);
+            const dataConsulta = new Date(consulta.data);
+            const diferencaHoras = (dataConsulta - agora) / (1000 * 60 * 60);
+                
+            if (diferencaHoras <= 24 && diferencaHoras > 0) {
+                console.log('A consulta está muito próxima e não pode ser excluída.');
+                return;
+            }
+    
+            await enviarNotificacao(consultasDB[index]); // alertar q cancelou a consulta
+        
+            // Excluir a consulta
+            consultasDB.splice(index, 1);
+        
+            fs.writeFileSync(bdPath, JSON.stringify(consultasDB, null, 2));
+            console.log('Consulta excluída');
+            return;
+        } catch (error) {
+            console.error("Erro ao processar mensagem:", error.message);
         }
-    
-        const index = consultasDB.findIndex(acharIndex);
-        
-        console.log(index);
-    
-        consultasDB.splice(index, 1);
-    
-        fs.writeFileSync(bdPath,JSON.stringify(consultasDB, null, 2));
-        console.log('Consulta excluida');
-        return;
     }
 });

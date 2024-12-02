@@ -67,35 +67,45 @@ router.post('/login', async (req,res) => {
 
 //requisição POST para cadastrar usuário.
 //rota pública
-router.post('/create', async (req,res) => {
-    //extraindo os dados do formulário para criacao do usuario
-    const {username, email, password} = req.body; 
-    //Para facilitar já estamos considerando as validações feitas no front
-    //agora vamos verificar se já existe usuário com esse e-mail
-    
-    //verifica se já existe usuario com o email informado
-    for (let users of usuariosCadastrados){
-        if(users.email === email){
-            //usuario já existe. Impossivel criar outro
-            //Retornando o erro 409 para indicar conflito
-            return res.status(409).send(`Usuario já existe.`);
-        }   
+router.post('/create', async (req, res) => {
+    // Extraindo os dados do formulário
+    const { username, email, password, cpf, endereco, telefone, idade } = req.body;
+
+    // Verificar se todos os campos obrigatórios foram enviados
+    if (!username || !email || !password || !cpf || !endereco || !telefone || !idade) {
+        return res.status(400).send('Todos os campos são obrigatórios!');
     }
-    //Deu certo. Vamos colocar o usuário no "banco"
-    //Gerar um id incremental baseado na qt de users
+
+    // Verificar se já existe um usuário com esse e-mail
+    for (let user of usuariosCadastrados) {
+        if (user.email === email) {
+            // Usuário já existe, impossível criar outro
+            return res.status(409).send('Usuário já existe.');
+        }
+        if (user.cpf === cpf) {
+            // CPF já cadastrado, impossível criar outro
+            return res.status(409).send('CPF já cadastrado.');
+        }
+    }
+
+    // Gerar um ID único para o novo usuário (você pode optar por outra forma, como incrementação de ID)
     const id = Date.now();
-    
-    //gerar uma senha cryptografada
+
+    // Gerar uma senha criptografada
     const salt = await bcrypt.genSalt(10);
-    const passwordCrypt = await bcrypt.hash(password,salt);
+    const passwordCrypt = await bcrypt.hash(password, salt);
 
-    //Criacao do user
-    const user = new User(id, username, email, passwordCrypt);
+    // Criando o objeto do usuário com todos os campos
+    const user = new User(id, username, email, passwordCrypt, cpf, endereco, telefone, idade);
 
-    //Salva user no "banco"
+    // Salva o usuário no "banco"
     usuariosCadastrados.push(user);
-    fs.writeFileSync(bdPath,JSON.stringify(usuariosCadastrados,null,2));
-    res.status(200).send(`Tudo certo usuario criado com sucesso. id=${id}`);
+
+    // Atualiza o arquivo JSON com os usuários cadastrados
+    fs.writeFileSync(bdPath, JSON.stringify(usuariosCadastrados, null, 2));
+
+    // Retorna uma resposta de sucesso
+    res.status(200).send(`Usuário criado com sucesso. ID: ${id}`);
 });
 
 router.put('/atualizar', async (req,res) => {
