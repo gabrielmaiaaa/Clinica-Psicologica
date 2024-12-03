@@ -11,7 +11,7 @@ const schema = yup.object({
   password: yup.string().min(4, 'A senha tem que ter 4 caracteres').required(),
 }).required();
 
-export default function LoginUser() {
+exp0ort default function LoginUser() {
   
   const [msg, setMsg] = useState(' ');
 
