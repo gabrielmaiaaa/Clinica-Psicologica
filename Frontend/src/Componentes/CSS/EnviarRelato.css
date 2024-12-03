@@ -1,0 +1,82 @@
+/* EnviarRelato.css */
+.container {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* Azul claro */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 20px;
+  }
+  
+  h1 {
+    color: #004d7a; /* Azul escuro */
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  p {
+    color: #333;
+    font-size: 1.2em;
+    line-height: 1.6;
+  }
+  
+  textarea {
+    width: 100%; /* O campo vai ocupar toda a largura do container */
+    height: 200px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 1.1em;
+    resize: both; /* Permite redimensionar tanto horizontal quanto vertical */
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    outline: none;
+    background-color: white;
+    text-align: left; /* Garantir que o texto fique alinhado à esquerda */
+  }
+  
+  textarea:focus {
+    border-color: #004d7a; /* Azul escuro */
+  }
+  
+  button {
+    padding: 12px 20px;
+    font-size: 1.2em;
+    background-color: #004d7a; /* Azul escuro */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 200px;
+  }
+  
+  button:hover {
+    background-color: #003b5c; /* Tom mais escuro ao passar o mouse */
+  }
+  
+  button:focus {
+    outline: none;
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 2em;
+    }
+  
+    p {
+      font-size: 1em;
+    }
+  
+    textarea {
+      height: 150px;
+    }
+  
+    button {
+      width: 100%;
+    }
+  }
+  

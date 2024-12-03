@@ -42,48 +42,71 @@ export default function CreateAdmin() {
 
   return (
     <>
-      <h2>Cadastrar Psicologo</h2>
-      <form onSubmit={handleSubmit(submit)} noValidate>
-        <label htmlFor="username">Nome</label>
-        <input type="text" id='username' {...register('username')} />
-        <p className='erro'> {errors.username?.message} </p>
-
-        <label htmlFor="email">Email</label>
-        <input type="text" id='email' {...register('email')} />
-        <p className='erro'> {errors.email?.message} </p>
-
-        <label htmlFor="password">Senha</label>
-        <input type="password" id='password' {...register('password')} />
-        <p className='erro'> {errors.password?.message} </p>
-
-        <label htmlFor="passwordConf">Confirmar Senha</label>
-        <input type="password" id='passwordConf' {...register('passwordConf')} />
-        <p className='erro'> {errors.passwordConf?.message} </p>
-
-        {/* Campo CPF */}
-        <label htmlFor="cpf">CPF</label>
-        <input type="text" id='cpf' {...register('cpf')} />
-        <p className='erro'> {errors.cpf?.message} </p>
-
-        {/* Campo Endereço */}
-        <label htmlFor="endereco">Endereço</label>
-        <input type="text" id='endereco' {...register('endereco')} />
-        <p className='erro'> {errors.endereco?.message} </p>
-
-        {/* Campo Telefone */}
-        <label htmlFor="telefone">Telefone</label>
-        <input type="text" id='telefone' {...register('telefone')} />
-        <p className='erro'> {errors.telefone?.message} </p>
-
-        {/* Campo CIP */}
-        <label htmlFor="cip">CIP</label>
-        <input type="text" id='cip' {...register('cip')} />
-        <p className='erro'> {errors.cip?.message} </p>
-
-        <button>Registrar</button>
-      </form>
-      <p className='server-response'>{msg}</p>
-      <Link to='/'>Voltar</Link>
+      <div className="container">
+        <div className="card">
+          <h2>Cadastrar Psicologo</h2>
+          <form onSubmit={handleSubmit(submit)} noValidate>
+            
+            <div className="form-group">
+              <label htmlFor="username">Nome</label>
+              <input type="text" id='username' {...register('username')} />
+              <p className='erro'> {errors.username?.message} </p>
+            </div>
+  
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input type="text" id='email' {...register('email')} />
+              <p className='erro'> {errors.email?.message} </p>
+            </div>
+  
+            <div className="form-group">
+              <label htmlFor="password">Senha</label>
+              <input type="password" id='password' {...register('password')} />
+              <p className='erro'> {errors.password?.message} </p>
+            </div>
+  
+            <div className="form-group">
+              <label htmlFor="passwordConf">Confirmar Senha</label>
+              <input type="password" id='passwordConf' {...register('passwordConf')} />
+              <p className='erro'> {errors.passwordConf?.message} </p>
+            </div>
+  
+            {/* Campo CPF */}
+            <div className="form-group">
+              <label htmlFor="cpf">CPF</label>
+              <input type="text" id='cpf' {...register('cpf')} />
+              <p className='erro'> {errors.cpf?.message} </p>
+            </div>
+  
+            {/* Campo Endereço */}
+            <div className="form-group">
+              <label htmlFor="endereco">Endereço</label>
+              <input type="text" id='endereco' {...register('endereco')} />
+              <p className='erro'> {errors.endereco?.message} </p>
+            </div>
+  
+            {/* Campo Telefone */}
+            <div className="form-group">
+              <label htmlFor="telefone">Telefone</label>
+              <input type="text" id='telefone' {...register('telefone')} />
+              <p className='erro'> {errors.telefone?.message} </p>
+            </div>
+  
+            {/* Campo CIP */}
+            <div className="form-group">
+              <label htmlFor="cip">CIP</label>
+              <input type="text" id='cip' {...register('cip')} />
+              <p className='erro'> {errors.cip?.message} </p>
+            </div>
+  
+            <div className="buttons">
+              <button type="submit">Registrar</button>
+            </div>
+          </form>
+          <p className='server-response'>{msg}</p>
+          <Link to='/pagina-inicial'>Voltar</Link>
+        </div>
+      </div>
     </>
   );
 }

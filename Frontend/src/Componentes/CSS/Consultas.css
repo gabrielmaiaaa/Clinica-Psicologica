@@ -1,0 +1,104 @@
+/* Cadastro.css */
+.container {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* Azul claro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0 20px; /* Adicionando padding para não colar nas bordas */
+  }
+  
+  form {
+    background-color: #e3f2fd; /* Azul suave */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 400px; /* Limita a largura do formulário */
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #004d7a; /* Azul escuro */
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    text-align: left;
+    color: #004d7a; /* Azul escuro */
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    background-color: white;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="number"] {
+    background-color: white;
+  }
+  
+  .erro {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:first-of-type {
+    background-color: #004d7a; /* Azul escuro */
+    color: white;
+  }
+  
+  button:first-of-type:hover {
+    background-color: #003b5c; /* Tom mais escuro ao passar o mouse */
+  }
+  
+  button:last-of-type {
+    background-color: white;
+    color: #004d7a; /* Azul escuro */
+    border: 1px solid #004d7a;
+  }
+  
+  button:last-of-type:hover {
+    background-color: #004d7a;
+    color: white;
+  }
+  
+  .server-response {
+    margin-top: 15px;
+    color: green;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    form {
+      width: 100%;
+      max-width: 90%;
+    }
+  }
+  

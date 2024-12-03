@@ -1,0 +1,83 @@
+/* Cadastro.css */
+.container {
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff; /* Azul claro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+form {
+  background-color: #4d4d4d; /* Cinza escuro */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 300px;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  text-align: left;
+  color: white;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+  background-color: white;
+}
+
+.erro {
+  color: red;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100px;
+  padding: 10px;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:first-of-type {
+  background-color: black;
+  color: white;
+}
+
+button:last-of-type {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+
+.server-response {
+  margin-top: 15px;
+  color: green;
+  font-size: 14px;
+}
