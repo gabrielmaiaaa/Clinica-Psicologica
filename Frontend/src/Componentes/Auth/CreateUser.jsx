@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup"; //npm i @hookform/resolve
 import * as yup from "yup"; //npm i yup
 import axios from 'axios'; //npm i axios
 import { Navigate, Link } from 'react-router-dom';
+import '../CSS/Auth/Cadastro.css'
 
 const schema = yup.object({
   username: yup.string().required('Usuário obrigatório'),
@@ -13,7 +14,7 @@ const schema = yup.object({
   cpf: yup.string().required('CPF é obrigatório').length(11, 'CPF deve ter 11 caracteres'),
   endereco: yup.string().required('Endereço é obrigatório'),
   telefone: yup.string().required('Telefone é obrigatório').matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Formato de telefone inválido'),
-  idade: yup.number().required('Idade é obrigatória').min(18, 'Idade mínima é 18 anos').max(120, 'Idade máxima é 120 anos')
+  idade: yup.number('Idade obrigatória').required('Idade é obrigatória').min(18, 'Idade mínima é 18 anos').max(120, 'Idade máxima é 120 anos')
 }).required();
 
 export default function CreateUser() {
@@ -42,48 +43,50 @@ export default function CreateUser() {
 
   return (
     <>
-      <h2>Criar Usuário</h2>
-      <form onSubmit={handleSubmit(submit)} noValidate>
-        <label htmlFor="username">Nome</label>
-        <input type="text" id='username' {...register('username')} />
-        <p className='erro'> {errors.username?.message} </p>
+      <div className="container">
+        <div className="card">  
+          <h2>Criar Usuário</h2>
+          <form onSubmit={handleSubmit(submit)} noValidate>
+            <label htmlFor="username">Nome</label>
+            <input type="text" id="username" {...register('username')} />
+            <p className="erro">{errors.username?.message}</p>
 
-        <label htmlFor="email">Email</label>
-        <input type="text" id='email' {...register('email')} />
-        <p className='erro'> {errors.email?.message} </p>
+            <label htmlFor="email">Email</label>
+            <input type="text" id="email" {...register('email')} />
+            <p className="erro">{errors.email?.message}</p>
 
-        <label htmlFor="password">Senha</label>
-        <input type="password" id='password' {...register('password')} />
-        <p className='erro'> {errors.password?.message} </p>
+            <label htmlFor="telefone">Telefone</label>
+            <input type="text" id="telefone" {...register('telefone')} />
+            <p className="erro">{errors.telefone?.message}</p>
 
-        <label htmlFor="passwordConf">Confirmar Senha</label>
-        <input type="password" id='passwordConf' {...register('passwordConf')} />
-        <p className='erro'> {errors.passwordConf?.message} </p>
+            <label htmlFor="password">Senha</label>
+            <input type="password" id="password" {...register('password')} />
+            <p className="erro">{errors.password?.message}</p>
 
-        {/* Campo CPF */}
-        <label htmlFor="cpf">CPF</label>
-        <input type="text" id='cpf' {...register('cpf')} />
-        <p className='erro'> {errors.cpf?.message} </p>
+            <label htmlFor="passwordConf">Confirmar Senha</label>
+            <input type="password" id="passwordConf" {...register('passwordConf')} />
+            <p className="erro">{errors.passwordConf?.message}</p>
 
-        {/* Campo Endereço */}
-        <label htmlFor="endereco">Endereço</label>
-        <input type="text" id='endereco' {...register('endereco')} />
-        <p className='erro'> {errors.endereco?.message} </p>
+            <label htmlFor="cpf">CPF</label>
+            <input type="text" id="cpf" {...register('cpf')} />
+            <p className="erro">{errors.cpf?.message}</p>
 
-        {/* Campo Telefone */}
-        <label htmlFor="telefone">Telefone</label>
-        <input type="text" id='telefone' {...register('telefone')} />
-        <p className='erro'> {errors.telefone?.message} </p>
+            <label htmlFor="idade">Idade</label>
+            <input type="number" id="idade" {...register('idade')} />
+            <p className="erro">{errors.idade?.message}</p>
 
-        {/* Campo Idade */}
-        <label htmlFor="idade">Idade</label>
-        <input type="number" id='idade' {...register('idade')} />
-        <p className='erro'> {errors.idade?.message} </p>
+            <label htmlFor="endereco">Endereço</label>
+            <input type="text" id="endereco" {...register('endereco')} />
+            <p className="erro">{errors.endereco?.message}</p>
 
-        <button>Registrar</button>
-      </form>
-      <p className='server-response'>{msg}</p>
-      <Link to='/'>Voltar</Link>
+            <div className="buttons">
+              <button type="submit">Cadastrar</button>
+              <button type="button">Deletar</button>
+            </div>
+          </form>
+          <Link to="/">Voltar</Link>
+        </div>
+      </div>
     </>
   );
 }

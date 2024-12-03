@@ -1,0 +1,58 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .pagina-inicial {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: #f0f8ff; /* Tom de azul claro */
+    min-height: 100vh;
+  }
+  
+  .menu {
+    width: 100%;
+    background-color: #004d7a; /* Azul escuro */
+    color: white;
+    padding: 10px 0;
+  }
+  
+  .menu nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .menu-item {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2em;
+  }
+  
+  .menu-item:hover {
+    text-decoration: underline;
+  }
+  
+  .conteudo {
+    margin: 20px;
+    background-color: #e3f2fd; /* Azul suave */
+    border-radius: 8px;
+    padding: 20px;
+    width: 80%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #004d7a;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    color: #333;
+    font-size: 1.2em;
+    line-height: 1.6;
+  }
+  
