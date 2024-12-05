@@ -50,6 +50,11 @@ export default function LoginUser() {
     client.on('message', (topico, message) => {
       if (topico === 'auth/Autorizacao') {
         const dados = JSON.parse(message.toString());
+
+        sessionStorage.setItem('token', dados.token);
+        sessionStorage.setItem('id', dados.id);
+        sessionStorage.setItem('username', dados.username);
+        sessionStorage.setItem('email', dados.email);
         console.log('Dados recebidos:', dados);
         if(dados.email === data.email)
           setMsg('Usuário Autenticado');

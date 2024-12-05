@@ -5,6 +5,7 @@ import * as yup from "yup"; //npm i yup
 import axios from 'axios'; //npm i axios
 import { Navigate, Link } from 'react-router-dom';
 import mqtt from 'mqtt';
+import '../CSS/Auth/Cadastro.css'
 
 const schema = yup.object({
   username: yup.string().required('Usuário obrigatório'),

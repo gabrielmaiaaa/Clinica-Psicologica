@@ -10,7 +10,9 @@ export default function EnviarRelato() {
 
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('email');
+    console.log(storedEmail);
     if (storedEmail) {
+      
       setEmail(storedEmail);
     }
     const storedUsername = sessionStorage.getItem('username');

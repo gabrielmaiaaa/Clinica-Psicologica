@@ -23,6 +23,6 @@
     "concurrently": "^9.1.0"
   },
   "scripts": {
-    "start": "concurrently \"nodemon mqtt/loginAuth.js\" \"nodemon mqtt/createAuth.js\" \"nodemon mqtt/relatos.js\" \"nodemon mqtt/consultas.js\" \"nodemon mqtt/notificar.js\" \"nodemon mqtt/relatos.js\" \"nodemon mqtt/consultas.js\" \"nodemon mqtt/psicologos.js\""
+    "start": "concurrently \"nodemon mqtt/loginAuth.js\" \"nodemon mqtt/createAuth.js\" \"nodemon mqtt/relatos.js\" \"nodemon mqtt/consultas.js\" \"node mqtt/notificar.js\" \"node mqtt/relatos.js\" \"nodemon mqtt/consultas.js\" \"nodemon mqtt/psicologos.js\""
   }
 }

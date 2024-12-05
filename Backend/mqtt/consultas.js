@@ -143,8 +143,11 @@ client.on('message', async (topico, message) => {
                         return;
                     }
 
+                    const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cip === consultaGrave.cip);
+
                     const assunto = `Nova data da consulta ${consultasDB[index2].data}`
                     const assunto1 = `Nova data da consulta ${consultaGrave.data}`
+                    const assunto2 = `Alterações de consultas de dois pacientes!`
 
                     const htmlPacienteReservado = `
                         <h1>Olá, ${pacienteReservado.username}!</h1>
@@ -160,10 +163,19 @@ client.on('message', async (topico, message) => {
                         <p>Att,</p>
                         <p>Clinica Psiquiatra</p>
                     `;
+                    const htmlPsicologo = `
+                        <h1>Olá, ${psicologoEncontrado.username}!</h1>
+                        <p>Algumas consultas suas foram alterados!</p>
+                        <p>Uma nova consulta do paciente ${consultaGrave.paciente} foi marcada para o dia ${consultaGrave.data} às ${consultaGrave.horario}</p>
+                        <p>E a do paciente ${pacienteReservado.username} para o dia ${consultasDB[index2].data} às ${consultasDB[index2].horario}</p>
+                        <p>Att,</p>
+                        <p>Clinica Psiquiatra</p>
+                    `;
                     // Envia notificações
                     await Promise.all([
                         enviarNotificacao(pacienteReservado.email, assunto, htmlPacienteReservado), // Para a consulta substituída
-                        enviarNotificacao(pacienteOficial.email, assunto1, htmlPacienteExistente) // Para a nova consulta grave
+                        enviarNotificacao(pacienteOficial.email, assunto1, htmlPacienteExistente), // Para a nova consulta grave
+                        enviarNotificacao(psicologoEncontrado.email, assunto2, htmlPsicologo) // Para o psicologo grave
                     ])
                     console.log('Consulta grave reagendada com sucesso e paciente notificado.');
                     return;

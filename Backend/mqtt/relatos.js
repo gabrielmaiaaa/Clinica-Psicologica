@@ -9,6 +9,9 @@ const relatosBD = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 const usuarioBDPath = path.join(__dirname,'..','db','cliente.json');
 const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'}));
 
+const administrativoBDPath = path.join(__dirname,'..','db','administrativo.json');
+const psicologosCadastrados = JSON.parse(fs.readFileSync(administrativoBDPath, {encoding: 'utf-8'}));
+
 const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
     username: 'Gamaia',
     password: 'Maia1234'
@@ -35,11 +38,19 @@ client.on('message', async (topico, message) => {
         try {
             const relato = JSON.parse(message.toString());
 
-            const usuarioAchado = usuarioDB.find(usuario => usuario.email === relato.email);
+            let usuarioAchado = usuarioDB.find(usuario => usuario.email === relato.email);
+
+            if(!usuarioAchado){                
+                usuarioAchado = psicologosCadastrados.find(usuario => usuario.email === relato.email);
+                console.log(usuarioAchado);
+            }
+
             const dadosCompletos = {
                     ...usuarioAchado,  
                     ...relato,         
                 };
+            console.log(relato.email);
+                
 
             //Salva user no "banco"
             relatosBD.push(dadosCompletos);
@@ -65,7 +76,7 @@ client.on('message', async (topico, message) => {
             if (gravidade === 'grave') {
                 client.publish(
                     'relatos/notificar',
-                    JSON.stringify({ username: relato.username, email: relato.email, text: relato.text, gravidade }),
+                    JSON.stringify({ username: dadosCompletos.username, email: relato.email, text: relato.text, gravidade }),
                     () => {
                         console.log(`Relato analisado e enviado: ${relato.username} com gravidade de ${gravidade}`);
                     }
