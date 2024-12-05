@@ -4,7 +4,10 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-const client = mqtt.connect('wss://test.mosquitto.org:8081');
+const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
+    username: 'Gamaia',
+    password: 'Maia1234'
+  });
 
 const psicologoBDPath = path.join(__dirname,'..','db','administrativo.json');
 const psicologoDB = JSON.parse(fs.readFileSync(psicologoBDPath, {encoding: 'utf-8'}));

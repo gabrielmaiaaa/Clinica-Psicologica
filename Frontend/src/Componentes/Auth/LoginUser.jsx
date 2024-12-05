@@ -5,13 +5,14 @@ import * as yup from "yup"; //npm i yup
 import axios from 'axios';//npm i axios
 import { Link, Navigate } from 'react-router-dom';
 import '../CSS/Auth/Cadastro.css'
+import mqtt from 'mqtt';
 
 const schema = yup.object({
   email: yup.string().email('Email inválida').required('Email obrigatório'),
   password: yup.string().min(4, 'A senha tem que ter 4 caracteres').required(),
 }).required();
 
-exp0ort default function LoginUser() {
+export default function LoginUser() {
   
   const [msg, setMsg] = useState(' ');
 
@@ -25,21 +26,45 @@ exp0ort default function LoginUser() {
   console.log(errors);
 
   const submit = async (data) => {
-    try{
-      const response = await axios.post('http://localhost:3000/auth/login', data);
-      sessionStorage.setItem('token', response.data.token);
-      sessionStorage.setItem('id', response.data.id);
-      sessionStorage.setItem('username', response.data.username);
-      sessionStorage.setItem('email', response.data.email);
-      // if(response.data.admin === 1){
-      //   setMsg('Admin Autenticado');
-      // } else{
-      //   setMsg('Usuário Autenticado');
-      // }
-      setMsg('Usuário Autenticado');
-    } catch (error){
-      setMsg(error.response.data);
-    }
+    const client = mqtt.connect('wss://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'Gamaia',
+      password: 'Maia1234'
+    });
+    
+    const payload = JSON.stringify({
+      email: data.email,
+      password: data.password
+    })
+  
+    client.on('connect', () => {
+      console.log('Conectado ao broker MQTT via WebSocket');
+      client.subscribe('auth/Autorizacao', (err) => {
+        if (err) {
+          console.log('Erro ao subscrever no tópico:', err);
+        } else {
+          console.log('Inscrito no tópico auth/Autorizacao');
+        }
+      });
+    });
+  
+    client.on('message', (topico, message) => {
+      if (topico === 'auth/Autorizacao') {
+        const dados = JSON.parse(message.toString());
+
+        sessionStorage.setItem('token', dados.token);
+        sessionStorage.setItem('id', dados.id);
+        sessionStorage.setItem('username', dados.username);
+        sessionStorage.setItem('email', dados.email);
+        console.log('Dados recebidos:', dados);
+        if(dados.email === data.email)
+          setMsg('Usuário Autenticado');
+      }
+    });
+  
+    // Publicar mensagem no tópico
+    client.publish('auth/login', payload, () => {
+      console.log('Solicitação enviada ao tópico consulta/excluirConsulta');
+    });
   }
 
   if(msg.includes('Admin Autenticado'))

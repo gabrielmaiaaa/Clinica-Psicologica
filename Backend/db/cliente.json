@@ -8,5 +8,35 @@
     "endereco": "Rua Um, Vila Oliveira",
     "telefone": "(38) 99910-6743",
     "idade": 20
+  },
+  {
+    "id": 1733410520668,
+    "username": "Pedrin",
+    "email": "teste@exemplo.us",
+    "password": "$2b$10$HyTopn5wmQl5gGQQ/3YVAed/IaNlmCjCOa6Wf9j1fuYF33jn8xztG",
+    "cpf": "23123232444",
+    "endereco": "Rua Inexistente, 2000",
+    "telefone": "(38) 99910-6743",
+    "idade": 23
+  },
+  {
+    "id": 1733410620308,
+    "username": "Gabriel",
+    "email": "d2022005689@unifei.edu.br",
+    "password": "$2b$10$Wmdug22TTgVElZfEJYyj2O5IF1Kmw/QWvtsBVY4a9IvkKX0ZwNyPG",
+    "cpf": "00112233446",
+    "endereco": "Rua Inexistente, 2000",
+    "telefone": "(22) 32456-0987",
+    "idade": 23
+  },
+  {
+    "id": 1733410756911,
+    "username": "Mamaia",
+    "email": "teste2@exemplo.us",
+    "password": "$2b$10$I/xGYHg7xnGZFwkGEb2kTOeBKNkRkI/xod3Vl9jeuHrnhvbpGUbe6",
+    "cpf": "00112233447",
+    "endereco": "Rua Inexistente, 2000",
+    "telefone": "(31) 2128-6800",
+    "idade": 26
   }
 ]

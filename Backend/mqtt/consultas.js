@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-const client = mqtt.connect('wss://test.mosquitto.org:8081');
+const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
+    username: 'Gamaia',
+    password: 'Maia1234'
+  });
 
 const bdPath = path.join(__dirname,'..','db','consulta.json');
 const consultasDB = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
@@ -52,11 +55,11 @@ const buscarNovoHorario = (data, horarioAtual) => {
 
 client.on('connect', () => {
     console.log('Conectado ao broker MQTT');
-    client.subscribe(['consulta/cadastrar', 'consulta/excluirConsulta'], (error) => {
+    client.subscribe(['consulta/cadastrar', 'consulta/excluirConsulta', 'consulta/consultas'], (error) => {
         if (error) {
             console.error('Erro ao se inscrever no tópico:', error);
         } else {
-            console.log('Inscrito no tópico "consulta/cadastrar" e no "consulta/excluirConsulta"');
+            console.log('Inscrito no tópico "consulta/cadastrar", "consulta/excluirConsulta" e "consulta/consultas"');
         }
     });
 })
@@ -71,17 +74,15 @@ const transporter = nodemailer.createTransport({
 })
 
 const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
-    try {
-        const info = await transporter.sendMail({
-            from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
-            to: destinatario,
-            subject: assunto,
-            html: conteudoHTML,
-        });
-        console.log(`Notificação enviada: ${info.messageId}`);
-    } catch (error) {
-        console.error('Erro ao enviar notificação:', error.message);
-    }
+    
+    const info = await transporter.sendMail({
+        from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
+        to: destinatario,
+        subject: assunto,
+        html: conteudoHTML,
+    });
+    console.log(`Notificação enviada: ${info.messageId}`);
+    
 };
 
 client.on('message', async (topico, message) => {
@@ -142,8 +143,11 @@ client.on('message', async (topico, message) => {
                         return;
                     }
 
+                    const psicologoEncontrado = psicologoDB.find(usuaio => usuaio.cip === consultaGrave.cip);
+
                     const assunto = `Nova data da consulta ${consultasDB[index2].data}`
                     const assunto1 = `Nova data da consulta ${consultaGrave.data}`
+                    const assunto2 = `Alterações de consultas de dois pacientes!`
 
                     const htmlPacienteReservado = `
                         <h1>Olá, ${pacienteReservado.username}!</h1>
@@ -159,10 +163,19 @@ client.on('message', async (topico, message) => {
                         <p>Att,</p>
                         <p>Clinica Psiquiatra</p>
                     `;
+                    const htmlPsicologo = `
+                        <h1>Olá, ${psicologoEncontrado.username}!</h1>
+                        <p>Algumas consultas suas foram alterados!</p>
+                        <p>Uma nova consulta do paciente ${consultaGrave.paciente} foi marcada para o dia ${consultaGrave.data} às ${consultaGrave.horario}</p>
+                        <p>E a do paciente ${pacienteReservado.username} para o dia ${consultasDB[index2].data} às ${consultasDB[index2].horario}</p>
+                        <p>Att,</p>
+                        <p>Clinica Psiquiatra</p>
+                    `;
                     // Envia notificações
                     await Promise.all([
                         enviarNotificacao(pacienteReservado.email, assunto, htmlPacienteReservado), // Para a consulta substituída
-                        enviarNotificacao(pacienteOficial.email, assunto1, htmlPacienteExistente) // Para a nova consulta grave
+                        enviarNotificacao(pacienteOficial.email, assunto1, htmlPacienteExistente), // Para a nova consulta grave
+                        enviarNotificacao(psicologoEncontrado.email, assunto2, htmlPsicologo) // Para o psicologo grave
                     ])
                     console.log('Consulta grave reagendada com sucesso e paciente notificado.');
                     return;
@@ -290,5 +303,10 @@ client.on('message', async (topico, message) => {
         } catch (error) {
             console.error("Erro ao processar mensagem:", error.message);
         }
+    } else if (topico === 'consulta/consultas'){
+        const dadosConsulta = JSON.stringify(consultasDB);
+        console.log(dadosConsulta);        
+        
+        client.publish('resposta/consultas', dadosConsulta);
     }
 });

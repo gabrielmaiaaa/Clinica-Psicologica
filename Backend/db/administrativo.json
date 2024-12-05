@@ -8,5 +8,15 @@
     "endereco": "Rua Pelicanos, UNIFEI",
     "telefone": "(38) 99910-6743",
     "cip": "5792156"
+  },
+  {
+    "id": 1733411655052,
+    "username": "Junior",
+    "email": "teste34@exemplo.us",
+    "password": "$2b$10$AtR5dOSlsOZ8h.rXMHhXS.Z9mZU.FigbCeEDrmm9gCWGyZen.hKKC",
+    "cpf": "00112233489",
+    "endereco": "Rua Inexistente, 2000",
+    "telefone": "(31) 2128-6800",
+    "cip": "5792198"
   }
 ]
