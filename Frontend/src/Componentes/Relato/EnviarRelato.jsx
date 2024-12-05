@@ -20,7 +20,10 @@ export default function EnviarRelato() {
   }, []);
 
   const handleSend = () => {
-    const client = mqtt.connect('wss://test.mosquitto.org:8081');
+    const client = mqtt.connect('wss://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'Gamaia',
+      password: 'Maia1234'
+    });
     const payload = JSON.stringify({
       username: username,
       email: email,

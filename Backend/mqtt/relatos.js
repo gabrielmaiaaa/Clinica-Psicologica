@@ -9,7 +9,10 @@ const relatosBD = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
 const usuarioBDPath = path.join(__dirname,'..','db','cliente.json');
 const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'}));
 
-const client = mqtt.connect('wss://test.mosquitto.org:8081');
+const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
+    username: 'Gamaia',
+    password: 'Maia1234'
+  });
 
 // Configurando as credenciais
 const AI = new language.LanguageServiceClient({

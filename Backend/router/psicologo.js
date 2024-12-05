@@ -36,7 +36,7 @@ router.get('/getPsicologo/:email', (req,res) => {
             email: dados.email
         });
     }
-    res.status(200).json(jogoDaJam);
+    res.status(200).json(dadosExpecificos);
 });
 
 router.post('/createPsicologo', async (req, res) => {

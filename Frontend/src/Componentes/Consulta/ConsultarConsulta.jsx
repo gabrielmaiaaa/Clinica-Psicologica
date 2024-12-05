@@ -10,14 +10,36 @@ export default function ConsultarConsulta() {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    const acharConsultas = async () => {
-      try {
-        const resposta = await axios.get(`http://localhost:3000/consulta/consultas`);
-        if (resposta.status === 200) setConsultas(resposta.data);
-      } catch (erro) {
-        console.log(erro);
+    const client = mqtt.connect('wss://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'Gamaia',
+      password: 'Maia1234'
+    });
+  
+    client.on('connect', () => {
+      console.log('Conectado ao broker MQTT via WebSocket');
+      client.subscribe('resposta/consultas', (err) => {
+        if (err) {
+          console.log('Erro ao subscrever no tópico:', err);
+        } else {
+          console.log('Inscrito no tópico resposta/consultas');
+        }
+      });
+    });
+  
+    client.on('message', (topico, message) => {
+      if (topico === 'resposta/consultas') {
+        const dados = JSON.parse(message.toString());
+        setConsultas(dados);
+        console.log('Dados recebidos:', dados);
       }
-    };
+    });
+  
+    // Publicar mensagem no tópico
+    client.publish('consulta/consultas', JSON.stringify({ exemplo: 'dados' }), () => {
+      console.log('Solicitação enviada ao tópico consulta/excluirConsulta');
+    });
+  
+    // Recuperar dados do sessionStorage
     const storedEmail = sessionStorage.getItem('email');
     if (storedEmail) {
       setEmail(storedEmail);
@@ -26,11 +48,19 @@ export default function ConsultarConsulta() {
     if (storedUsername) {
       setUsername(storedUsername);
     }
-    acharConsultas();
+  
+    // Encerrar a conexão ao desmontar o componente
+    return () => {
+      client.end();
+    };
   }, []);
+  
 
   const handleDelete = async (dados) => {
-    const client = mqtt.connect('wss://test.mosquitto.org:8081');
+    const client = mqtt.connect('wss://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'Gamaia',
+      password: 'Maia1234'
+    });
     const payload = JSON.stringify({
       id: dados.id,
       cip: dados.cip,

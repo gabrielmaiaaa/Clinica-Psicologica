@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-const client = mqtt.connect('wss://test.mosquitto.org:8081');
+const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
+    username: 'Gamaia',
+    password: 'Maia1234'
+  });
 
 const bdPath = path.join(__dirname,'..','db','consulta.json');
 const consultasDB = JSON.parse(fs.readFileSync(bdPath, {encoding: 'utf-8'}));
@@ -52,11 +55,11 @@ const buscarNovoHorario = (data, horarioAtual) => {
 
 client.on('connect', () => {
     console.log('Conectado ao broker MQTT');
-    client.subscribe(['consulta/cadastrar', 'consulta/excluirConsulta'], (error) => {
+    client.subscribe(['consulta/cadastrar', 'consulta/excluirConsulta', 'consulta/consultas'], (error) => {
         if (error) {
             console.error('Erro ao se inscrever no tópico:', error);
         } else {
-            console.log('Inscrito no tópico "consulta/cadastrar" e no "consulta/excluirConsulta"');
+            console.log('Inscrito no tópico "consulta/cadastrar", "consulta/excluirConsulta" e "consulta/consultas"');
         }
     });
 })
@@ -71,17 +74,15 @@ const transporter = nodemailer.createTransport({
 })
 
 const enviarNotificacao = async (destinatario, assunto, conteudoHTML) => {
-    try {
-        const info = await transporter.sendMail({
-            from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
-            to: destinatario,
-            subject: assunto,
-            html: conteudoHTML,
-        });
-        console.log(`Notificação enviada: ${info.messageId}`);
-    } catch (error) {
-        console.error('Erro ao enviar notificação:', error.message);
-    }
+    
+    const info = await transporter.sendMail({
+        from: '"Clinica Psicologa" <gabrielmaia6743@gmail.com>',
+        to: destinatario,
+        subject: assunto,
+        html: conteudoHTML,
+    });
+    console.log(`Notificação enviada: ${info.messageId}`);
+    
 };
 
 client.on('message', async (topico, message) => {
@@ -290,5 +291,10 @@ client.on('message', async (topico, message) => {
         } catch (error) {
             console.error("Erro ao processar mensagem:", error.message);
         }
+    } else if (topico === 'consulta/consultas'){
+        const dadosConsulta = JSON.stringify(consultasDB);
+        console.log(dadosConsulta);        
+        
+        client.publish('resposta/consultas', dadosConsulta);
     }
 });

@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup"; //npm i @hookform/resolve
 import * as yup from "yup"; //npm i yup
 import axios from 'axios'; //npm i axios
 import { Navigate, Link } from 'react-router-dom';
+import mqtt from 'mqtt';
 
 const schema = yup.object({
   username: yup.string().required('Usuário obrigatório'),
@@ -28,13 +29,45 @@ export default function CreateAdmin() {
   const { errors } = formState;
 
   const submit = async (data) => {
-    try {
-      const response = await axios.post('http://localhost:3000/psicologo/createPsicologo', data);
-      if (response.status === 200)
-        setMsg('OK');
-    } catch (error) {
-      setMsg(error.response.data);
-    }
+    const client = mqtt.connect('wss://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'Gamaia',
+      password: 'Maia1234'
+    });
+    
+    const payload = JSON.stringify({
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      cpf: data.cpf,
+      endereco: data.endereco,
+      telefone: data.telefone,
+      cip: data.cip
+    })
+  
+    client.on('connect', () => {
+      console.log('Conectado ao broker MQTT via WebSocket');
+      client.subscribe('psicologo/AutorizacaoCreate', (err) => {
+        if (err) {
+          console.log('Erro ao subscrever no tópico:', err);
+        } else {
+          console.log('Inscrito no tópico psicologo/AutorizacaoCreate');
+        }
+      });
+    });
+  
+    client.on('message', (topico, message) => {
+      if (topico === 'psicologo/AutorizacaoCreate') {
+        const dados = JSON.parse(message.toString());
+        console.log('Dados recebidos:', dados);
+        if(dados.status === 200)
+          setMsg('OK');
+      }
+    });
+  
+    // Publicar mensagem no tópico
+    client.publish('psicologo/create', payload, () => {
+      console.log('Solicitação enviada ao tópico psicologo/create');
+    });
   }
 
   if (msg === 'OK')
