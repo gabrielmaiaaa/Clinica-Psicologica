@@ -12,7 +12,10 @@ const usuarioDB = JSON.parse(fs.readFileSync(usuarioBDPath, {encoding: 'utf-8'})
 const administrativoBDPath = path.join(__dirname,'..','db','administrativo.json');
 const psicologosCadastrados = JSON.parse(fs.readFileSync(administrativoBDPath, {encoding: 'utf-8'}));
 
-const client = mqtt.connect('mqtt://192.168.141.62:1883');
+const client = mqtt.connect('mqtts://b7f0aae8c6514adeb1fb7f81c1743e30.s1.eu.hivemq.cloud:8883', {
+    username: 'Gamaia',
+    password: 'Maia1234'
+  });
 
 // Configurando as credenciais
 const AI = new language.LanguageServiceClient({
